@@ -25,7 +25,7 @@ const Footer: React.FC = () => {
       </div>
 
       {/* Middle Section - Built By */}
-      <div className="text-center">
+      {/* <div className="text-center">
         <a
           href="https://www.instagram.com/supremeleader.io/"
           target="_blank"
@@ -34,7 +34,7 @@ const Footer: React.FC = () => {
         >
           Built and designed by Gambhir Poudel
         </a>
-      </div>
+      </div> */}
 
       {/* Right Side - Logo */}
       <div className="text-gray-400 hover:text-green transition-colors duration-300">
