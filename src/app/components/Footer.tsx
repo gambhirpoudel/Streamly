@@ -14,7 +14,7 @@ const Footer: React.FC = () => {
         <p className="text-sm text-mixed-600">
           Your Gateway to Unlimited Entertainment
         </p>
-        <p className="text-xs text-gray-400">
+        <p className="text-sm text-gray-400">
           This site does not store any files on our server,<br />
           we only link to the media<br />
           which is hosted on 3rd party services.
