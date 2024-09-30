@@ -5,6 +5,7 @@ import TrendingTV from './components/TrendingTV';
 import TopRatedMovies from './components/TopRatedMovies';
 import Footer from './components/Footer';
 import TrendingMedia from './components/AllTrending';
+import TopRatedTvs from './components/TopRatedTV';
 
 const Index = () => {
   return (
@@ -14,6 +15,7 @@ const Index = () => {
         <TrendingMovies />
         <TrendingTV/>
         <TopRatedMovies/>
+        <TopRatedTvs/>
         <Footer/>
       </div>
     </main>

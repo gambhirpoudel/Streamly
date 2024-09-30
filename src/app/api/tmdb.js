@@ -146,6 +146,20 @@ export const fetchtrendingTVs = async () => {
   }
 };
 
+
+// Fetching TopRated TV
+export const fetchtopRatedTVs = async () => {
+  const url = `${BASE_URL}/tv/top_rated?api_key=${API_KEY}&language=en-US`;
+
+  try {
+    const response = await axios.get(url);
+    return response.data.results;
+  } catch (error) {
+    console.error("Error fetching trending TV:", error);
+    return [];
+  }
+};
+
 // TV Details
 export const fetchTvDetails = async (tvId) => {
   try {
