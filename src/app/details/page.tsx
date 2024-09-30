@@ -321,7 +321,7 @@ const DetailsPage: React.FC = () => {
             {showLeftButton && (
               <button
                 onClick={scrollLeft}
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-gray-700 text-white p-1 sm:p-2 rounded-full shadow-lg hover:bg-gray-600 transition-colors duration-300"
+                className="hidden sm:block absolute  left-4 top-1/2 transform -translate-y-1/2 bg-gray-700 text-white p-1 sm:p-2 rounded-full shadow-lg hover:bg-gray-600 transition-colors duration-300"
                 aria-label="Scroll Cast Left"
               >
                 <i className="fas fa-chevron-left"></i>
