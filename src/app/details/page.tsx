@@ -1,7 +1,14 @@
 "use client";
 import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { fetchMovieDetails, fetchmovieCredits, fetchTvcredits, fetchMovieVideos, fetchTvVideos, fetchTvDetails } from '../api/tmdb';
+import {
+  fetchMovieDetails,
+  fetchmovieCredits,
+  fetchTvcredits,
+  fetchMovieVideos,
+  fetchTvVideos,
+  fetchTvDetails,
+} from '../api/tmdb';
 import { MovieDetails, TVShowDetails, Video } from '../types/types';
 import largePoster from "../assets/posterLogoLarge.png";
 import smallPoster from "../assets/posterLogoSmall.png";
@@ -53,11 +60,12 @@ const DetailsPage: React.FC = () => {
         setDetails(detailsData || null);
         setCast(creditsData?.cast || []);
 
-        const trailer = videosData?.find((video: Video) =>
-          video.name === 'Official Trailer' || (video.type === 'Trailer' && video.site === 'YouTube')
+        const trailer = videosData?.find(
+          (video: Video) =>
+            video.name === 'Official Trailer' ||
+            (video.type === 'Trailer' && video.site === 'YouTube')
         );
         setTrailerKey(trailer ? trailer.key : null);
-
       } catch (error) {
         console.error('Error fetching details or cast:', error);
       }
@@ -115,14 +123,8 @@ const DetailsPage: React.FC = () => {
   };
 
   const handlePlayNow = () => {
-    if(type == 'movie'){
-      router.push(`/watch?type=${type}&id=${id}`);
-    } else{
-         router.push(`/watch?type=${type}&id=${id}`);
-    }
- 
+    router.push(`/watch?type=${type}&id=${id}`);
   };
-
 
   const openOverviewModal = () => {
     setIsModalOpen(true);
@@ -132,207 +134,225 @@ const DetailsPage: React.FC = () => {
     setIsModalOpen(false);
   };
 
-  if (!details) return null;
+  if (!details) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-gray-900 to-black">
+        <p className="text-white text-lg">Loading...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="relative w-full h-auto pb-8 bg-gradient-to-b from-gray-900 to-black text-white overflow-hidden">
-      <div className="relative w-full h-screen">
-        <img
-          src={`${imageUrl}${details.backdrop_path}`}
-          alt={('title' in details ? details.title : details.name) || 'Details'}
-          className="absolute inset-0 w-full h-full object-cover filter brightness-50"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black to-black opacity-70"></div>
-      </div>
+<div className="relative w-full bg-gradient-to-b from-gray-900 to-black text-white overflow-hidden">
+  <div
+    className="absolute inset-0"
+    style={{
+      backgroundImage: `url(${imageUrl}${details.backdrop_path})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      filter: 'brightness(30%)', 
+    }}
+  />
 
-      <div className="absolute top-1/4 left-0 right-0 p-6 md:p-12 flex flex-col md:flex-row items-start md:items-center max-w-screen-xl mx-auto">
-        <img
-          src={details.poster_path ? `${imageUrl}${details.poster_path}` : `${largePoster.src}`}
-          alt={('title' in details ? details.title : details.name) || 'Details'}
-          className="w-64 h-96 md:w-80 md:h-96 object-cover rounded-lg shadow-2xl border border-gray-800"
-        />
-        <div className="md:ml-8 mt-6 md:mt-0 flex-1">
-          <h1 className="text-white text-body md:text-6xl lg:text-heading font-extrabold mb-4">{('title' in details ? details.title : details.name) || 'Details'}</h1>
-          <div className="flex flex-wrap items-center gap-6 mb-6">
-            <div className="flex items-center space-x-2">
-              <i className="fas fa-star text-yellow-400 text-xl"></i>
-              <p className="text-white text-lg">{details.vote_average.toFixed(1) || 'N/A'}</p>
-            </div>
-            <div className="flex items-center space-x-2">
-              <i className="fas fa-calendar-alt text-white text-lg"></i>
-              <p className="text-white text-lg">{('release_date' in details ? details.release_date : details.first_air_date) || 'Details'}</p>
-            </div>
-            <div className="flex items-center space-x-2">
-              <i className="fas fa-language text-white text-lg"></i>
-              <p className="text-white text-lg">{details.original_language.toUpperCase() || 'N/A'}</p>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-3 mb-2">
-            {('genres' in details ? details.genres : []).map(genre => (
-              <span
-                key={genre.id}
-                className="bg-gray-800 text-white text-sm px-4 py-2 rounded-lg shadow-md"
-              >
-                {genre.name}
-              </span>
-            ))}
-          </div>
-          <div className="overview-container text-gray-300 text-body mb-1" style={{ maxWidth: '800px' }}>
-            <p className={` ${showFullOverview ? 'line-clamp-none' : 'line-clamp-3'}`}>
-              {details.overview}
-            </p>
-            {!showFullOverview && details.overview.length > 300 && (
-              <button
-                onClick={openOverviewModal}
-                className="text-blue-400 underline mt-2"
-              >
-                Read More
-              </button>
-            )}
-          </div>
-          <div className="flex space-x-4">
-            <button
-              onClick={handleWatchNow}
-              className="bg-white text-black px-4 py-2 rounded-lg shadow-lg hover:bg-gray-300 transition-colors duration-300 flex items-center"
-            >
-              <i className="fas fa-play mr-2"></i>
-              Play Trailer
-            </button>
-           {type !== 'tv' && (
-          <button
-            onClick={handlePlayNow}
-            className="bg-opacity-15 text-white px-4 py-2 rounded-lg shadow-lg bg-white hover:bg-opacity-30 transition-colors duration-300 flex items-center border border-white"
-          >
-            <i className="fa-solid fa-circle-play mr-2"></i>
-            Play Now
-          </button>
-        )}
-          </div>
-        </div>
-      </div>
-
-{/* Seasons Section */}
-{type === 'tv' && details && details.seasons.length > 0 && (
-  <div className="mt-40 py-6 max-w-screen-xl mx-auto relative">
-    <h2 className="text-white text-4xl font-bold mb-4 text-center">Seasons</h2>
-    <div className="relative">
-      <div
-        className={`w-full flex overflow-x-auto space-x-4 px-4 py-2 ${details.seasons.length > 7 ? 'no-scrollbar' : ''}`}
-        ref={scrollSeasonContainerRef}
-        onScroll={handleSeasonScroll}
-      >
-        {details.seasons
-          .filter(season => season.name.toLowerCase() !== 'specials')
-          .map(season => (
-            <div
-              key={season.season_number}
-              className="relative flex-none w-40 h-60 bg-gray-800 rounded-lg overflow-hidden shadow-lg cursor-pointer"
-              onClick={() =>
-                router.push(`/seasons?tvId=${details.id}&seasonNumber=${season.season_number}`)
-              }
-            >
-              <img
-                  src={season.poster_path ? `${imageUrl}${season.poster_path}` : `${smallPoster.src}`}
-                alt={season.name}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute bottom-0 bg-gradient-to-t from-black via-black opacity-80 w-full text-center text-white py-2">
-                <p className="text-lg font-semibold">{season.name}</p>
-                <p className="text-sm">{season.episode_count} episodes</p>
+      {/* Main Content */}
+      <div className="relative max-w-screen-xl mx-auto px-4 mt-20 sm:px-6 lg:px-8 py-12">
+        <div className="flex flex-col md:flex-row items-center md:items-start">
+          <img
+            src={details.poster_path ? `${imageUrl}${details.poster_path}` : `${largePoster.src}`}
+            alt={('title' in details ? details.title : details.name) || 'Details'}
+            className="w-48 sm:w-64 md:w-80 h-auto md:h-96 object-cover rounded-lg shadow-2xl border border-gray-800"
+          />
+          <div className="md:ml-8 mt-6 md:mt-0 flex-1 text-center md:text-left">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-extrabold mb-4 leading-tight">
+              {('title' in details ? details.title : details.name) || 'Details'}
+            </h1>
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mb-6">
+              <div className="flex items-center space-x-2">
+                <i className="fas fa-star text-yellow-400 text-xl"></i>
+                <p className="text-lg">{details.vote_average.toFixed(1) || 'N/A'}</p>
+              </div>
+              <div className="flex items-center space-x-2">
+                <i className="fas fa-calendar-alt text-lg"></i>
+                <p className="text-lg">
+                  {('release_date' in details ? details.release_date : details.first_air_date) || 'N/A'}
+                </p>
+              </div>
+              <div className="flex items-center space-x-2">
+                <i className="fas fa-language text-lg"></i>
+                <p className="text-lg">{details.original_language.toUpperCase() || 'N/A'}</p>
               </div>
             </div>
-          ))}
+            <div className="flex flex-wrap gap-2 sm:gap-3 mb-2 justify-center md:justify-start">
+              {('genres' in details ? details.genres : []).map((genre) => (
+                <span
+                  key={genre.id}
+                  className="bg-gray-800 text-xs sm:text-sm px-3 sm:px-4 py-1 sm:py-2 rounded-lg shadow-md"
+                >
+                  {genre.name}
+                </span>
+              ))}
+            </div>
+            <div className="overview-container text-gray-300 text-sm sm:text-base mb-4" style={{ maxWidth: '800px' }}>
+              <p className={`${showFullOverview ? 'line-clamp-none' : 'line-clamp-3'}`}>
+                {details.overview}
+              </p>
+              {!showFullOverview && details.overview.length > 300 && (
+                <button
+                  onClick={openOverviewModal}
+                  className="text-blue-400 underline mt-2"
+                >
+                  Read More
+                </button>
+              )}
+            </div>
+            <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
+              <button
+                onClick={handleWatchNow}
+                className="bg-white text-black px-3 sm:px-4 py-2 sm:py-3 rounded-lg shadow-lg hover:bg-gray-300 transition-colors duration-300 flex items-center justify-center w-full sm:w-auto"
+              >
+                <i className="fas fa-play mr-2"></i>
+                Play Trailer
+              </button>
+              {type !== 'tv' && (
+                <button
+                  onClick={handlePlayNow}
+                  className="bg-opacity-15 text-white px-3 sm:px-4 py-2 sm:py-3 rounded-lg shadow-lg bg-white hover:bg-opacity-30 transition-colors duration-300 flex items-center justify-center w-full sm:w-auto border border-white"
+                >
+                  <i className="fas fa-circle-play mr-2"></i>
+                  Play Now
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
-      {details.seasons.some(season => season.name.toLowerCase() !== 'specials') && details.seasons.length > 7 && (
-        <div className="absolute inset-y-0 left-0 flex items-center pl-2">
-          {showSeasonLeftButton && (
-            <button
-              onClick={scrollSeasonLeft}
-              className="bg-gray-800 text-white p-2 rounded-full shadow-lg hover:bg-gray-700 transition-colors duration-300"
-            >
-              <i className="fas fa-chevron-left"></i>
-            </button>
-          )}
-        </div>
-      )}
-      {details.seasons.some(season => season.name.toLowerCase() !== 'specials') && details.seasons.length > 7 && (
-        <div className="absolute inset-y-0 right-0 flex items-center pr-2">
-          {showSeasonRightButton && (
-            <button
-              onClick={scrollSeasonRight}
-              className="bg-gray-800 text-white p-2 rounded-full shadow-lg hover:bg-gray-700 transition-colors duration-300"
-            >
-              <i className="fas fa-chevron-right"></i>
-            </button>
-          )}
-        </div>
-      )}
-    </div>
-  </div>
-)}
 
+      {/* Seasons Section */}
+      {type === 'tv' && details && details.seasons.length > 0 && (
+        <div className="py-6 max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-center">Seasons</h2>
+          <div className="relative">
+            <div
+              className="w-full flex overflow-x-auto space-x-4 py-2 snap-x no-scrollbar"
+              ref={scrollSeasonContainerRef}
+              onScroll={handleSeasonScroll}
+            >
+              {details.seasons
+                .filter((season) => season.name.toLowerCase() !== 'specials')
+                .map((season) => (
+                  <div
+                    key={season.season_number}
+                    className="relative flex-none w-32 sm:w-40 h-48 sm:h-60 bg-gray-800 rounded-lg overflow-hidden shadow-lg cursor-pointer snap-start"
+                    onClick={() =>
+                      router.push(`/seasons?tvId=${details.id}&seasonNumber=${season.season_number}`)
+                    }
+                  >
+                    <img
+                      src={season.poster_path ? `${imageUrl}${season.poster_path}` : `${smallPoster.src}`}
+                      alt={season.name}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute bottom-0 bg-gradient-to-t from-black via-black opacity-80 w-full text-center text-white py-2">
+                      <p className="text-lg font-semibold">{season.name}</p>
+                      <p className="text-sm">{season.episode_count} episodes</p>
+                    </div>
+                  </div>
+                ))}
+            </div>
+            {/* Scroll Buttons */}
+            {details.seasons.length > 7 && (
+              <>
+                {showSeasonLeftButton && (
+                  <button
+                    onClick={scrollSeasonLeft}
+                    className="hidden sm:block absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-1 sm:p-2 rounded-full shadow-lg hover:bg-gray-700 transition-colors duration-300"
+                    aria-label="Scroll Seasons Left"
+                  >
+                    <i className="fas fa-chevron-left"></i>
+                  </button>
+                )}
+                {showSeasonRightButton && (
+                  <button
+                    onClick={scrollSeasonRight}
+                    className="hidden sm:block absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-1 sm:p-2 rounded-full shadow-lg hover:bg-gray-700 transition-colors duration-300"
+                    aria-label="Scroll Seasons Right"
+                  >
+                    <i className="fas fa-chevron-right"></i>
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Cast Section */}
-      <div className="relative mt-10 py-6 max-w-screen-xl mx-auto">
-        <h2 className="text-white text-4xl font-bold mb-4 text-center">Cast</h2>
+      <div className="py-6 max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 relative ">
+        <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-center">Cast</h2>
         <div
           ref={scrollContainerRef}
-          className="w-full flex overflow-x-auto space-x-4 px-4 py-2 no-scrollbar"
+          className="w-full flex overflow-x-auto space-x-4 py-2 snap-x no-scrollbar"
           onScroll={handleScroll}
         >
           {cast.length > 0 ? (
-            cast.map(member => (
+            cast.map((member) => (
               <div
                 key={member.id}
-                className="relative flex-none w-40 h-60 bg-gray-800 rounded-lg overflow-hidden shadow-lg"
+                className="relative flex-none w-32 sm:w-40 h-48 sm:h-60 bg-gray-800 rounded-lg overflow-hidden shadow-lg snap-start"
               >
                 <img
                   src={member.profile_path ? `${imageUrl}${member.profile_path}` : `${smallPoster.src}`}
                   alt={member.name}
                   className="w-full h-full object-cover"
                 />
-                             <div className="absolute bottom-0 bg-gradient-to-t from-black via-black opacity-80 w-full text-center text-white py-2">
+                <div className="absolute bottom-0 bg-gradient-to-t from-black via-black opacity-80 w-full text-center text-white py-2">
                   <p className="text-lg font-semibold">{member.name}</p>
                   <p className="text-sm">{member.character}</p>
                 </div>
               </div>
             ))
           ) : (
-            <p className="text-gray-400 text-lg text-center">No cast available</p>
+            <p className="text-gray-400 text-lg text-center w-full">No cast available</p>
           )}
         </div>
         {/* Scroll Buttons */}
-        {showLeftButton && (
-          <button
-            onClick={scrollLeft}
-            className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-gray-700 text-white p-2 rounded-full shadow-lg hover:bg-gray-600"
-          >
-            <i className="fas fa-chevron-left"></i>
-          </button>
+        {cast.length > 7 && (
+          <>
+            {showLeftButton && (
+              <button
+                onClick={scrollLeft}
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-gray-700 text-white p-1 sm:p-2 rounded-full shadow-lg hover:bg-gray-600 transition-colors duration-300"
+                aria-label="Scroll Cast Left"
+              >
+                <i className="fas fa-chevron-left"></i>
+              </button>
+            )}
+            {showRightButton && (
+              <button
+                onClick={scrollRight}
+                className="hidden sm:block absolute right-4 top-1/2 transform -translate-y-1/2 bg-gray-700 text-white p-1 sm:p-2 rounded-full shadow-lg hover:bg-gray-600 transition-colors duration-300"
+                aria-label="Scroll Cast Right"
+              >
+                <i className="fas fa-chevron-right"></i>
+              </button>
+            )}
+          </>
         )}
-        {showRightButton && cast.length > 7 ? (
-          <button
-            onClick={scrollRight}
-            className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-gray-700 text-white p-2 rounded-full shadow-lg hover:bg-gray-600"
-          >
-            <i className="fas fa-chevron-right"></i>
-          </button>
-        ): ""}
       </div>
 
       {/* Trailer Modal */}
       {isTrailerPlaying && trailerKey && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-          <div className="relative w-full max-w-4xl">
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4 sm:p-6">
+          <div className="relative w-full max-w-3xl sm:max-w-4xl">
             <button
               onClick={() => setIsTrailerPlaying(false)}
               className="absolute top-0 right-0 mt-4 mr-4 text-white text-3xl"
+              aria-label="Close Trailer"
             >
               <i className="fas fa-times"></i>
             </button>
             <iframe
-              width="100%"
-              height="400"
+              className="w-full h-64 sm:h-80 md:h-96"
               src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1`}
               title="YouTube video player"
               frameBorder="0"
@@ -345,16 +365,19 @@ const DetailsPage: React.FC = () => {
 
       {/* Overview Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-          <div className="relative w-full max-w-4xl bg-gray-900 p-8 rounded-lg shadow-lg">
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4 sm:p-6">
+          <div className="relative w-full max-w-3xl sm:max-w-4xl bg-gray-900 p-6 sm:p-8 rounded-lg shadow-lg">
             <button
               onClick={closeOverviewModal}
-              className="absolute top-0 right-0 mt-4 mr-4 text-white text-3xl"
+              className="absolute top-4 right-4 text-white text-3xl"
+              aria-label="Close Overview"
             >
               <i className="fas fa-times"></i>
             </button>
-            <h2 className="text-white text-3xl font-bold mb-4">{('title' in details ? details.title : details.name) || 'Details'}</h2>
-            <p className="text-gray-300 text-lg">{details.overview}</p>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4">
+              {('title' in details ? details.title : details.name) || 'Details'}
+            </h2>
+            <p className="text-gray-300 text-base sm:text-lg">{details.overview}</p>
           </div>
         </div>
       )}
